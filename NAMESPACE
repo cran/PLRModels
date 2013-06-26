@@ -1,0 +1,1 @@
+export("plrm.beta", "par.est", "np.est", "plrm.est", "np.cv", "np.gcv", "plrm.cv", "plrm.gcv", "par.ancova", "np.ancova", "plrm.ancova", "par.gof", "np.gof", "plrm.gof")
