@@ -6,14 +6,15 @@ Goodness-of-Fit tests in linear regression models
 }
 \description{
 This routine tests the equality of the vector of coefficients, \eqn{\beta}, in a linear regression model and a given parameter vector, \eqn{\beta_0}, from a sample \eqn{{(Y_i, X_{i1},...,X_{ip}): i=1,...,n}}, where:
-\deqn{\beta = (\beta_1,...,\beta_p)\;is\;an\;unknown\;vector\;parameter}
-and
+\deqn{\beta = (\beta_1,...,\beta_p)}
+is an unknown vector parameter and
 \deqn{Y_i = X_{i1}*\beta_1+ ... + X_{ip}*\beta_p + \epsilon_i.}
-The random errors, \eqn{{\epsilon_i}}, are allowed to be time series. The test statistic used for testing the null hypothesis, \eqn{H0: \beta = \beta_0}, derives from the asymptotic normality of the ordinary least squares estimator of \eqn{\beta}, this result giving a \eqn{\chi^2}-test.
+The random errors, \eqn{\epsilon_i}, are allowed to be time series. The test statistic used for testing the null hypothesis, \eqn{H0: \beta = \beta_0}, derives from the asymptotic normality of the ordinary least squares estimator of \eqn{\beta}, this result giving a \eqn{\chi^2}-test.
 }
 \usage{
-par.gof(data = data, beta0 = NULL, time.series = FALSE, Var.Cov.eps = NULL,
-p.max = 3, q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
+par.gof(data = data, beta0 = NULL, time.series = FALSE, 
+Var.Cov.eps = NULL, p.max = 3, q.max = 3, ic = "BIC", 
+num.lb = 10, alpha = 0.05)
 }
 \arguments{
    \item{data}{
@@ -31,13 +32,17 @@ p.max = 3, q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
   \item{alpha}{if \code{Var.Cov.eps=NULL}, \code{alpha} contains the significance level which the ARMA model is checked. The default is 0.05.} 
 }
 \details{
-If \code{Var.Cov.eps=NULL} and the routine is not able to suggest an approximation for \code{Var.Cov.eps}, the program stops and a value for \code{Var.Cov.eps} is required. In order to construct \code{Var.Cov.eps}, the procedure suggested in Domowitz (1982) can be followed.
+If \code{Var.Cov.eps=NULL} and the routine is not able to suggest an approximation for \code{Var.Cov.eps}, it warns the user with a message saying that the model could be not appropriate and then it shows the results. In order to construct \code{Var.Cov.eps}, the procedure suggested in Domowitz (1982) can be followed.
 
 The implemented procedure particularizes the parametric test in the routine \code{plrm.gof} to the case where is known that the nonparametric component in the corresponding PLR model is null.
 }
-\value{A dataframe containing:
+\value{A list with a dataframe containing:
   \item{Q.beta}{value of the test statistic.}
   \item{p.value}{p-value of the corresponding statistic test.}
+  Moreover, if \code{data} is a time series and \code{Var.Cov.eps} is not especified:
+  \item{pv.Box.test}{p-values of the Ljung-Box test for the model fitted to the residuals.}
+  \item{pv.t.test}{p-values of the t.test for the model fitted to the residuals.}
+  \item{ar.ma}{ARMA orders for the model fitted to the residuals.}
 }
 \references{
 Domowitz, J. (1982) The linear model with stochastic regressors and heteroscedastic dependent errors. Discussion paper No 543, Center for Mathematical studies in Economic and Management Science, Northwestern University, Evanston, Illinois.
@@ -54,10 +59,23 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are \code{\link{np.gof}} and \code{\link{plrm.gof}}.
 }
 \examples{
-### Example: dependent data
+# EXAMPLE 1: REAL DATA
+data(barnacles1)
+data <- as.matrix(barnacles1)
+data <- diff(data, 12)
+data <- cbind(data[,1],1,data[,-1])
+
+## Example 1.1: false null hypothesis
+par.gof(data)
+## Example 1.2: true null hypothesis
+par.gof(data, beta0=c(0,0.15,0.4))
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: dependent data
 
 set.seed(1234)
-
 # We generate the data
 n <- 100
 beta <- c(0.05, 0.01)
@@ -68,10 +86,10 @@ epsilon <- arima.sim(list(order = c(1,0,0), ar=0.7), sd = 0.01, n = n)
 y <-  sum + epsilon
 data <- cbind(y,x)
 
-## Example 1: true null hypothesis
+## Example 2a.1: true null hypothesis
 par.gof(data, beta0=c(0.05, 0.01))
 
-## Example 2: false null hypothesis
+## Example 2a.2: false null hypothesis
 par.gof(data) 
 
 }

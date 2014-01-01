@@ -6,17 +6,19 @@ Semiparametric analysis of covariance (based on PLR models)
 }
 \description{
 From samples \eqn{{(Y_{ki}, X_{ki1}, ..., X_{kip}, t_i): i=1,...,n}}, \eqn{k=1,...,L}, this routine tests the null hypotheses \eqn{H0: \beta_1 = ... = \beta_L} and \eqn{H0: m_1 = ... = m_L}, where:
-\deqn{\beta_k = (\beta_{k1},...,\beta_{kp})\;is\;an\;unknown\;vector\;parameter,}
-\deqn{m_k(.)\;is\;a\;smooth\;but\;unknown\;function}
-and
+\deqn{\beta_k = (\beta_{k1},...,\beta_{kp})}
+is an unknown vector parameter;
+\deqn{m_k(.)}
+is a smooth but unknown function and
 \deqn{Y_{ki}= X_{ki1}*\beta_{k1} +...+ X_{kip}*\beta_{kp} + m(t_i) + \epsilon_{ki}.}
-Fixed equally spaced design is considered for the "nonparametric" explanatory variable, \eqn{t}, and the random errors, \eqn{{\epsilon_{ki}}_i}, are allowed to be time series. The test statistic used for testing \eqn{H0: \beta_1 = ...= \beta_L} derives from the asymptotic normality of an estimator of \eqn{\beta_k} (\eqn{k=1,...,L}) based on both ordinary least squares and kernel smoothing (this result giving a \eqn{\chi^2}-test). The test statistic used for testing \eqn{H0: m_1 = ...= m_L} derives from a Cramer-von-Mises-type functional based on different distances between nonparametric estimators of \eqn{m_k} (\eqn{k=1,...,L}).
+Fixed equally spaced design is considered for the "nonparametric" explanatory variable, \eqn{t}, and the random errors, \eqn{\epsilon_{ki}}, are allowed to be time series. The test statistic used for testing \eqn{H0: \beta_1 = ...= \beta_L} derives from the asymptotic normality of an estimator of \eqn{\beta_k} (\eqn{k=1,...,L}) based on both ordinary least squares and kernel smoothing (this result giving a \eqn{\chi^2}-test). The test statistic used for testing \eqn{H0: m_1 = ...= m_L} derives from a Cramer-von-Mises-type functional based on different distances between nonparametric estimators of \eqn{m_k} (\eqn{k=1,...,L}).
 }
 \usage{
-plrm.ancova(data = data, t = t, b.seq = NULL, h.seq = NULL, w = NULL, 
-estimator = "NW", kernel = "quadratic", time.series = FALSE, 
-Var.Cov.eps = NULL, Tau.eps = NULL, b0 = NULL, h0 = NULL, lag.max = 50, 
-p.max = 3, q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
+plrm.ancova(data = data, t = t, b.seq = NULL, h.seq = NULL, 
+w = NULL, estimator = "NW", kernel = "quadratic", 
+time.series = FALSE, Var.Cov.eps = NULL, Tau.eps = NULL, 
+b0 = NULL, h0 = NULL, lag.max = 50, p.max = 3, q.max = 3,
+ic = "BIC", num.lb = 10, alpha = 0.05)
 }
 \arguments{
    \item{data}{
@@ -45,15 +47,19 @@ p.max = 3, q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
 \details{
 A weight function (specifically, the indicator function \bold{1}\eqn{_{[w[1] , w[2]]}}) is introduced in the test statistic for testing \eqn{H0: m_1 = ... = m_L} to allow elimination (or at least significant reduction) of boundary effects from the estimate of \eqn{m_k(t_i)}.
 
-If \code{Var.Cov.eps=NULL} and the routine is not able to suggest an approximation for \code{Var.Cov.eps}, the program stops and a value for \code{Var.Cov.eps} is required. In order to construct \code{Var.Cov.eps}, the procedure suggested in Aneiros-Perez and Vieu (2013) can be followed.
+If \code{Var.Cov.eps=NULL} and the routine is not able to suggest an approximation for \code{Var.Cov.eps}, it warns the user with a message saying that the model could be not appropriate and then it shows the results. In order to construct \code{Var.Cov.eps}, the procedure suggested in Aneiros-Perez and Vieu (2013) can be followed.
 
-If \code{Tau.eps=NULL} and the routine is not able to suggest an approximation for \code{Tau.eps}, the program stops and a value for \code{Tau.eps} is required. In order to construct \code{Tau.eps}, the procedures suggested in Aneiros-Perez (2008) can be followed.
+If \code{Tau.eps=NULL} and the routine is not able to suggest an approximation for \code{Tau.eps}, it warns the user with a message saying that the model could be not appropriate and then it shows the results. In order to construct \code{Tau.eps}, the procedures suggested in Aneiros-Perez (2008) can be followed.
 
 Expressions for the implemented statistic tests can be seen in (15) and (16) in Aneiros-Perez (2008).
 }
 \value{A list with two dataframes:
   \item{parametric.test}{a dataframe containing the bandwidths, the statistics and the p-values when one tests \eqn{H0: \beta_1 = ...= \beta_L}.}
   \item{nonparametric.test}{a dataframe containing the bandwidths b and h, the statistics, the normalised statistics and the p-values when one tests \eqn{H0: m_1 = ...= m_L}.}
+   Moreover, if \code{data} is a time series and \code{Tau.eps} or \code{Var.Cov.eps} are not especified:
+  \item{pv.Box.test}{p-values of the Ljung-Box test for the model fitted to the residuals.}
+  \item{pv.t.test}{p-values of the t.test for the model fitted to the residuals.}
+  \item{ar.ma}{ARMA orders for the model fitted to the residuals.}
 }
 \references{
 Aneiros-Perez, G. (2008) Semi-parametric analysis of covariance under dependence conditions within each group. \emph{Aust. N. Z. J. Stat.} \bold{50}, 97-123.
@@ -68,11 +74,30 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are \code{\link{plrm.est}}, \code{\link{par.ancova}} and \code{\link{np.ancova}}.
 }
 \examples{
-### Examples: dependent data
+# EXAMPLE 1: REAL DATA
+data(barnacles1)
+data <- as.matrix(barnacles1)
+data <- diff(data, 12)
+data <- cbind(data,1:nrow(data))
+
+data(barnacles2)
+data2 <- as.matrix(barnacles2)
+data2 <- diff(data2, 12)
+data2 <- cbind(data2,1:nrow(data2))
+
+data3 <- array(0, c(nrow(data),ncol(data)-1,2))
+data3[,,1] <- data[,-4]
+data3[,,2] <- data2[,-4]
+t <- data[,4]
+
+plrm.ancova(data=data3, t=t)
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: dependent data - true null hypotheses
 
 set.seed(1234)
-
-## Example 1: true null hypotheses
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n
@@ -98,7 +123,9 @@ data_eq <- array(c(data1,data2), c(n,3,2))
 plrm.ancova(data=data_eq, t=t, time.series=TRUE)
 
 
-## Example 2: false null hypotheses
+## Example 2b: dependent data - false null hypotheses
+
+set.seed(1234)
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n

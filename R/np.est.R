@@ -1,6 +1,6 @@
 
-np.est <- function(data=data, h.seq=NULL, newt=NULL, estimator="NW", 
-                   kernel = "quadratic")
+np.est <- function(data=data, h.seq=NULL, newt=NULL, 
+                   estimator="NW", kernel = "quadratic")
 {
 
 if (!is.matrix(data))  stop("data must be a matrix")
@@ -10,7 +10,7 @@ if ( (!is.null(h.seq)) && (sum(is.na(h.seq))  != 0) ) stop ("h.seq must be numer
 if ( (!is.null(h.seq)) && (any(h.seq<=0)) ) stop ("h.seq must contain one ore more positive values")
 
 if ( (!is.null(newt)) && (sum(is.na(newt))  != 0) ) stop ("newt must be numeric")
-if ( (!is.null(newt)) && (any(newt<=0)) ) stop ("newt must contain one ore more positive values")
+if ( (!is.null(newt)) && (any(newt<=0)) ) stop ("newt must contain one ore more positive values") 
 
 if ((estimator != "NW") & (estimator != "LLP"))  stop("estimator=NW or estimator=LLP is required")
 
@@ -24,7 +24,8 @@ t <- data[,2]
 
 if (is.null(newt)) newt <- t
 
-if (is.null(h.seq)) h.seq <- np.gcv(data=data, estimator=estimator, kernel=kernel)$h.opt
+if (is.null(h.seq)) h.seq <- np.cv(data=data, estimator=estimator, kernel=kernel)$h.opt[2,1]
+
 num.band <- length(h.seq)
 
 Yhat <- matrix(0, length(newt), num.band)

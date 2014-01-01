@@ -2,17 +2,18 @@
 \alias{plrm.est}
 
 \title{
-Semiparametric estimates for the unknown components of the regression function in  PLR models
+Semiparametric estimates for the unknown components of the regression function in PLR models
 }
 \description{
 This routine computes estimates for \eqn{\beta} and \eqn{m(newt_j)} (\eqn{j=1,...,J}) from a sample 
-
-\eqn{{(Y_i, X_{i1}, ..., X_{ip}, t_i): i=1,...,n}}, where:
-\deqn{\beta = (\beta_1,...,\beta_p)\;is\;an\;unknown\;vector\;parameter,}
-\deqn{m(.)\;is\;a\;smooth\;but\;unknown\;function}
-and
+\eqn{{(Y_i, X_{i1}, ..., X_{ip}, t_i)}}: 
+\eqn{i=1,...,n}, where:
+\deqn{\beta = (\beta_1,...,\beta_p)}
+is an unknown vector parameter,
+\deqn{m(.)}
+is a smooth but unknown function and
 \deqn{Y_i= X_{i1}*\beta_1 +...+ X_{ip}*\beta_p + m(t_i) + \epsilon_i.}
-The random errors, \eqn{{\epsilon_i}}, are allowed to be time series. Kernel smoothing, combined with ordinary least squares estimation, is used.
+The random errors, \eqn{\epsilon_i}, are allowed to be time series. Kernel smoothing, combined with ordinary least squares estimation, is used.
 }
 \usage{
 plrm.est(data = data, b = NULL, h = NULL, newt = NULL, estimator = "NW", 
@@ -28,8 +29,8 @@ kernel = "quadratic")
 
 \code{data[, p+2]} contains the values of the "nonparametric" explanatory variable, \eqn{t}.
 }
-   \item{b}{bandwidth for estimating the parametric part of the model. If both \code{b} and \code{h} are \code{NULL} (the default), it is selected by means of the generalized cross-validation procedure (fixing \code{b=h}); if \code{b} is \code{NULL} (the default) but \code{h} is not \code{NULL}, \code{b=h} is considered.}
-  \item{h}{\code{(b,h)} is the pair of bandwidths for estimating the nonparametric part of the model. If both \code{b} and \code{h} are \code{NULL} (the default), it is selected by means of the generalized cross-validation procedure (fixing \code{b=h}); if \code{b} is \code{NULL} (the default) but \code{h} is not \code{NULL}, \code{b=h} is considered; if \code{h} is \code{NULL} (the default) but \code{b} is not \code{NULL}, \code{h=b} is considered.}
+   \item{b}{bandwidth for estimating the parametric part of the model. If both \code{b} and \code{h} are \code{NULL} (the default), it is selected by means of the cross-validation procedure (fixing \code{b=h}); if \code{b} is \code{NULL} (the default) but \code{h} is not \code{NULL}, \code{b=h} is considered.}
+  \item{h}{\code{(b,h)} is the pair of bandwidths for estimating the nonparametric part of the model. If both \code{b} and \code{h} are \code{NULL} (the default), it is selected by means of the cross-validation procedure (fixing \code{b=h}); if \code{b} is \code{NULL} (the default) but \code{h} is not \code{NULL}, \code{b=h} is considered; if \code{h} is \code{NULL} (the default) but \code{b} is not \code{NULL}, \code{h=b} is considered.}
     \item{newt}{values of the "nonparametric" explanatory variable where the estimator of \eqn{m} is evaluated. If NULL (the default), the considered values will be the values of \code{data[,p+2]}.}
   \item{estimator}{allows us the choice between \dQuote{NW} (Nadaraya-Watson) or \dQuote{LLP} (Local Linear Polynomial). The default is \dQuote{NW}.}
   \item{kernel}{allows us the choice between \dQuote{gaussian}, \dQuote{quadratic} (Epanechnikov kernel), \dQuote{triweight} or \dQuote{uniform} kernel. The default is \dQuote{quadratic}.}   
@@ -37,7 +38,7 @@ kernel = "quadratic")
 \details{
 Expressions for the estimators of \eqn{\beta} and \eqn{m} can be seen in page 52 in Aneiros-Perez \emph{et al.} (2004).
 }
-\value{
+\value{A list containing:
 \item{beta}{a vector containing the estimate of \eqn{\beta}.}
 \item{m.t}{a vector containing the estimator of the non-parametric part, \eqn{m}, evaluated in the design points.}
 \item{m.newt}{a vector containing the estimator of the non-parametric part, \eqn{m}, evaluated in \code{newt}.}
@@ -60,9 +61,28 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are: \code{\link{plrm.beta}}, \code{\link{plrm.gcv}}, \code{\link{plrm.cv}}, \code{\link{np.est}}, \code{\link{np.gcv}} and \code{\link{np.cv}}.
 }
 \examples{
-set.seed(1234)
+# EXAMPLE 1: REAL DATA
+data(barnacles1)
+data <- as.matrix(barnacles1)
+data <- diff(data, 12)
+data <- cbind(data,1:nrow(data))
 
-## Example 1: independent data
+b.h <- plrm.gcv(data)$bh.opt
+ajuste <- plrm.est(data=data, b=b.h[1], h=b.h[2])
+ajuste$beta
+plot(data[,4], ajuste$m, type="l", xlab="t", ylab="m(t)")
+
+plot(data[,1], ajuste$fitted.values, xlab="y", ylab="y.hat", main="y.hat vs y")
+abline(0,1)
+
+mean(ajuste$residuals^2)/var(data[,1])
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: independent data
+
+set.seed(1234)
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n
@@ -77,7 +97,7 @@ y <-  sum + f + epsilon
 data_ind <- matrix(c(y,x,t),nrow=100)
 
 # We estimate the components of the PLR model
-# (GCV bandwidth)
+# (CV bandwidth)
 a <- plrm.est(data_ind)
 
 a$beta
@@ -88,7 +108,7 @@ points(t, 0.25*t*(1-t), type="l")
 legend(x="topleft", legend = c("m", "m hat"), col=c("black", "black"), lty=c(1,2))
 
 
-## Example 2: dependent data
+## Example 2b: dependent data
 # We generate the data
 x <- matrix(rnorm(200,0,1), nrow=n)
 sum <- x\%*\%beta

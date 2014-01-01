@@ -7,12 +7,13 @@ Nonparametric analysis of covariance
 \description{
 This routine tests the equality of \eqn{L} nonparametric regression curves (\eqn{m_1, ..., m_L}) from samples \eqn{{(Y_{ki}, t_i): i=1,...,n}}, \eqn{k=1,...,L}, where:
 \deqn{Y_{ki}= m_k(t_i) + \epsilon_{ki}.}
-The unknown functions \eqn{m_k} are smooth, fixed equally spaced design is considered, and the random errors, \eqn{{\epsilon_{ki}}_i}, are allowed to be time series. The test statistic used for testing the null hypothesis, \eqn{H0: m_1 = ...= m_L}, derives from a Cramer-von-Mises-type functional based on different distances between nonparametric estimators of the regression functions.
+The unknown functions \eqn{m_k} are smooth, fixed equally spaced design is considered, and the random errors, \eqn{\epsilon_{ki}}, are allowed to be time series. The test statistic used for testing the null hypothesis, \eqn{H0: m_1 = ...= m_L}, derives from a Cramer-von-Mises-type functional based on different distances between nonparametric estimators of the regression functions.
 }
 \usage{
 np.ancova(data = data, h.seq = NULL, w = NULL, estimator = "NW", 
-kernel = "quadratic", time.series = FALSE, Tau.eps = NULL, h0 = NULL, 
-lag.max = 50, p.max = 3, q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
+kernel = "quadratic", time.series = FALSE, Tau.eps = NULL, 
+h0 = NULL, lag.max = 50, p.max = 3, q.max = 3, ic = "BIC", 
+num.lb = 10, alpha = 0.05)
 }
 \arguments{
 \item{data}{
@@ -37,15 +38,19 @@ lag.max = 50, p.max = 3, q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
 \details{
 A weight function (specifically, the indicator function \bold{1}\eqn{_{[w[1] , w[2]]}}) is introduced in the test statistic to allow elimination (or at least significant reduction) of boundary effects from the estimate of \eqn{m(t_i)}.
 
-If \code{Tau.eps=NULL} and the routine is not able to suggest an approximation for \code{Tau.eps}, the program stops and a value for \code{Tau.eps} is required. In order to construct \code{Tau.eps}, the procedures suggested in Muller and Stadmuller (1988) and Herrmann \emph{et al.} (1992) can be followed.
+If \code{Tau.eps=NULL} and the routine is not able to suggest an approximation for \code{Tau.eps}, it warns the user with a message saying that the model could be not appropriate and then it shows the results. In order to construct \code{Tau.eps}, the procedures suggested in Muller and Stadmuller (1988) and Herrmann \emph{et al.} (1992) can be followed.
 
 For more details, see Vilar-Fernandez and Gonzalez-Manteiga (2004).
 }
-\value{A dataframe containing:
+\value{A list with a dataframe containing:
   \item{h.seq}{sequence of bandwidths used in the test statistic.}
   \item{Q.m}{values of the test statistic (one for each bandwidth in \code{h.seq}).}
   \item{Q.m.normalised}{normalised value of Q.m.}
   \item{p.value}{p-values of the corresponding statistic tests (one for each bandwidth in \code{h.seq}).}
+  Moreover, if \code{data} is a time series and \code{Tau.eps} is not especified:
+  \item{pv.Box.test}{p-values of the Ljung-Box test for the model fitted to the residuals.}
+  \item{pv.t.test}{p-values of the t.test for the model fitted to the residuals.}
+  \item{ar.ma}{ARMA orders for the model fitted to the residuals.}
 }
 \references{
 Dette, H. and Neumeyer, N. (2001) Nonparametric analysis of covariance.
@@ -64,11 +69,33 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are \code{\link{np.est}}, \code{\link{par.ancova}} and \code{\link{plrm.ancova}}.
 }
 \examples{
-### Examples: dependent data
+# EXAMPLE 1: REAL DATA
+data <- matrix(10,120,2)
+data(barnacles1)
+barnacles1 <- as.matrix(barnacles1)
+data[,1] <- barnacles1[,1]
+data <- diff(data, 12)
+data[,2] <- 1:nrow(data)
+
+data2 <- matrix(10,120,2)
+data(barnacles2)
+barnacles2 <- as.matrix(barnacles2)
+data2[,1] <- barnacles2[,1]
+data2 <- diff(data2, 12)
+data2[,2] <- 1:nrow(data2)
+
+data3 <- matrix(0, nrow(data),ncol(data)+1)
+data3[,1] <- data[,1]
+data3[,2:3] <- data2
+
+np.ancova(data=data3)
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2.1: dependent data: true null hypothesis
 
 set.seed(1234)
-
-## Example 1: true null hypothesis
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n
@@ -87,7 +114,7 @@ data_eq <- cbind(y1, y2, t)
 np.ancova(data_eq, time.series=TRUE)
 
 
-## Example 2: false null hypothesis
+## Example 2.2: dependent data: false null hypothesis
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n

@@ -8,14 +8,15 @@ Generalized cross-validation bandwidth selection in PLR models
 From a sample \eqn{{(Y_i, X_{i1}, ..., X_{ip}, t_i): i=1,...,n}}, this routine computes an optimal pair of bandwidths for estimating the regression function of the model
 \deqn{Y_i= X_{i1}*\beta_1 +...+ X_{ip}*\beta_p + m(t_i) + \epsilon_i,}
 where
-\deqn{\beta = (\beta_1,...,\beta_p)\;is\;an\;unknown\;vector\;parameter}
-and
-\deqn{m(.)\;is\;a\;smooth\;but\;unknown\;function.}
+\deqn{\beta = (\beta_1,...,\beta_p)}
+is an unknown vector parameter and
+\deqn{m(.)}
+is a smooth but unknown function.
 The optimal pair of bandwidths, \code{(b.opt, h.opt)}, is selected by means of the generalized cross-validation procedure. The bandwidth \code{b.opt} is used in the estimate of \eqn{\beta}, while the pair of bandwidths \code{(b.opt, h.opt)} is considered in the estimate of \eqn{m}. Kernel smoothing, combined with ordinary least squares estimation, is used.
 }
 \usage{
-plrm.gcv(data = data, b.equal.h = TRUE, num.b = NULL, num.h = NULL, 
-estimator = "NW", kernel = "quadratic")
+plrm.gcv(data = data, b.equal.h = TRUE, b.seq=NULL, h.seq=NULL, 
+num.b = NULL, num.h = NULL, estimator = "NW", kernel = "quadratic")
 }
 \arguments{
 \item{data}{
@@ -28,8 +29,10 @@ estimator = "NW", kernel = "quadratic")
 \code{data[, p+2]} contains the values of the "nonparametric" explanatory variable, \eqn{t}.
 }
   \item{b.equal.h}{if TRUE (the default), the same bandwidth is used for estimating both \eqn{\beta} and \eqn{m}.}
-  \item{num.b}{number of values used to build the sequence of considered bandwidths for estimating \eqn{\beta}. If both \code{num.b} and \code{num.h} are \code{NULL} (the default), \code{num.b=50} is considered; if \code{num.b} is \code{NULL} (the default) but \code{num.h} is not \code{NULL}, \code{num.b=num.h} is considered; if \code{b.equal.h=TRUE} (the default) and both \code{num.b} and \code{num.h} are not \code{NULL} and different, the maximum value of \code{num.b} and \code{num.h} is considered for both.}
-  \item{num.h}{pairs of bandwidths (\code{b, h}) are used for estimating \eqn{m}, \code{num.h} being the number of values considered for \code{h}. If both \code{num.b} and \code{num.h} are \code{NULL} (the default), \code{num.h=50} is considered; if \code{num.h} is \code{NULL} (the default) but \code{num.b} is not \code{NULL}, \code{num.h=num.b} is considered; if \code{b.equal.h=TRUE} (the default) and both \code{num.b} and \code{num.h} are not \code{NULL} and different, the maximum value of \code{num.b} and \code{num.h} is considered for both.}
+  \item{b.seq}{sequence of considered bandwidths, \code{b}, in the GCV function for estimating \eqn{\beta}.}
+  \item{h.seq}{sequence of considered bandwidths, \code{h}, in the pair of bandwidths \code{(b, h)} used in the GCV function for estimating \eqn{m}.}
+  \item{num.b}{number of values used to build the sequence of considered bandwidths for estimating \eqn{\beta}. If \code{b.seq} is not \code{NULL}, \code{num.b=length(b.seq)}. Otherwise, if both \code{num.b} and \code{num.h} are \code{NULL} (the default), \code{num.b=50} is considered; if \code{num.b} is \code{NULL} (the default) but \code{num.h} is not \code{NULL}, then \code{num.b=num.h} is considered; if \code{b.equal.h=TRUE} (the default) and both \code{num.b} and \code{num.h} are not \code{NULL} and different, the maximum value of \code{num.b} and \code{num.h} is considered for both.}
+  \item{num.h}{pairs of bandwidths (\code{b, h}) are used for estimating \eqn{m}, \code{num.h} being the number of values considered for \code{h}. If \code{h.seq} is not \code{NULL}, \code{num.h=length(h.seq)}. Otherwise, if both \code{num.b} and \code{num.h} are \code{NULL} (the default), \code{num.h=50} is considered; if \code{num.h} is \code{NULL} (the default) but \code{num.b} is not \code{NULL}, \code{num.h=num.b} is considered; if \code{b.equal.h=TRUE} (the default) and both \code{num.b} and \code{num.h} are not \code{NULL} and different, the maximum value of \code{num.b} and \code{num.h} is considered for both.}
   \item{estimator}{allows us the choice between \dQuote{NW} (Nadaraya-Watson) or \dQuote{LLP} (Local Linear Polynomial). The default is \dQuote{NW}.}
   \item{kernel}{allows us the choice between \dQuote{gaussian}, \dQuote{quadratic} (Epanechnikov kernel), \dQuote{triweight} or \dQuote{uniform} kernel. The default is \dQuote{quadratic}.}
 }
@@ -40,8 +43,8 @@ The implemented procedure generalizes that one in page 423 in Speckman (1988) by
 \item{bh.opt}{selected value for \code{(b,h)}.}
 \item{GCV.opt}{minimum value of the GCV function.}
 \item{GCV}{matrix containing the values of the GCV function for each pair of bandwidths considered.}
-\item{b.seq}{sequence of considered bandwidths, \code{b}, in the GCV function for estimating \eqn{\beta}: \code{num.b} equidistant values between zero and a quarter of the range of \eqn{{t_i}}.}
-\item{h.seq}{sequence of considered bandwidths, \code{h}, in the pair of bandwidths \code{(b, h)} used in the GCV function for estimating \eqn{m}: \code{num.h} equidistant values between zero and a quarter of the range of \eqn{{t_i}}.}
+\item{b.seq}{sequence of considered bandwidths, \code{b}, in the GCV function for estimating \eqn{\beta}. If \code{b.seq} was not input by the user, it is composed by \code{num.b} equidistant values between zero and a quarter of the range of \eqn{{t_i}}.}
+\item{h.seq}{sequence of considered bandwidths, \code{h}, in the pair of bandwidths \code{(b, h)} used in the GCV function for estimating \eqn{m}. If \code{h.seq} was not input by the user, it is composed by \code{num.h} equidistant values between zero and a quarter of the range of \eqn{{t_i}}.}
 }
 \references{
 Aneiros-Perez, G., Gonzalez-Manteiga, W. and Vieu, P. (2004) Estimation and testing in a partial linear regression under long-memory dependence. \emph{Bernoulli} \bold{10}, 49-78.
@@ -57,7 +60,21 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are: \code{\link{plrm.beta}}, \code{\link{plrm.est}}, \code{\link{plrm.cv}}, \code{\link{np.est}}, \code{\link{np.gcv}} and \code{\link{np.cv}}.
 }
 \examples{
-### Example: independent data
+# EXAMPLE 1: REAL DATA
+
+data(barnacles1)
+data <- as.matrix(barnacles1)
+data <- diff(data, 12)
+data <- cbind(data,1:nrow(data))
+
+aux <- plrm.gcv(data)
+aux$bh.opt
+plot(aux$b.seq, aux$GCV, xlab="h", ylab="GCV", type="l")
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: independent data
 
 set.seed(1234)
 

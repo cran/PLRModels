@@ -5,13 +5,12 @@
 Estimation in linear regression models
 }
 \description{
-This routine computes the ordinary least squares estimate for \eqn{\beta} from a sample \eqn{(Y_i, X_{i1},...,X_{ip}):}
-
+This routine computes the ordinary least squares estimate for \eqn{\beta} from a sample \eqn{(Y_i, X_{i1},...,X_{ip}),}
 \eqn{i=1,...,n}, where:
-\deqn{\beta = (\beta_1,...,\beta_p)\;is\;an\;unknown\;vector\;parameter}
-and
+\deqn{\beta = (\beta_1,...,\beta_p)}
+is an unknown vector parameter and
 \deqn{Y_i = X_{i1}*\beta_1+ ... + X_{ip}*\beta_p + \epsilon_i.}
-The random errors, \eqn{{\epsilon_i}}, are allowed to be time series.
+The random errors, \eqn{\epsilon_i}, are allowed to be time series.
 }
 \usage{
 par.est(data = data)
@@ -41,9 +40,27 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are \code{\link{plrm.beta}} and \code{\link{plrm.est}}.
 }
 \examples{
-set.seed(1234)
+# EXAMPLE 1: REAL DATA
+data(barnacles1)
+data <- as.matrix(barnacles1)
+data <- diff(data, 12)
+data <- cbind(data[,1],1,data[,-1])
 
-## Example 1: independent data
+beta <- par.est(data=data)
+beta
+residuos <- data[,1] - data[,-1]\%*\%beta
+mean(residuos^2)/var(data[,1])
+
+fitted.values <- data[,-1]\%*\%beta
+plot(data[,1], fitted.values, xlab="y", ylab="y.hat", main="y.hat vs y")
+abline(0,1)
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: independent data
+
+set.seed(1234)
 # We generate the data
 n <- 100
 beta <- c(0.05, 0.01)
@@ -58,7 +75,9 @@ data_ind <- matrix(c(y,x),nrow=100)
 par.est(data_ind)
 
 
-## Example 2: dependent data
+## Example 2b: dependent data
+
+set.seed(1234)
 # We generate the data
 x <- matrix(rnorm(200,0,1), nrow=n)
 sum <- x\%*\%beta

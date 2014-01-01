@@ -1,9 +1,12 @@
 
-np.gcv <- function(data=data, num.h=50, estimator="NW", kernel="quadratic")
+np.gcv <- function(data=data, h.seq=NULL, num.h=50, estimator="NW", kernel="quadratic")
 {
   
 if (!is.matrix(data))  stop("data must be a matrix")
 if (ncol(data) != 2)  stop("data must have 2 columns: y and t")
+
+if ( (!is.null(h.seq)) && (sum(is.na(h.seq))  != 0) ) stop ("h.seq must be numeric")
+if ( (!is.null(h.seq)) && (any(h.seq<=0)) ) stop ("h.seq must contain one ore more positive values")
 
 if (is.null(num.h))   stop ("num.h must not be NULL") 
 if (length(num.h) !=1)  stop ("num.h must be an only value")
@@ -19,22 +22,24 @@ kernel.function <- get(kernel)
 n <- nrow(data)
 y <- data[, 1]
 t <- data[, 2]
+    
   
+if (is.null(h.seq)) {
+  a <- as.matrix(abs(outer(t, t,"-")))
+  for (i in 1:n) {a[i,i] <- -1000}
+  a <- as.vector(a[a!=-1000])
+  
+  h.min <- quantile(a,0.05)
+  h.max <- (max(t)-min(t))*0.25
+  
+  h.seq <- seq(h.min, h.max, length.out=num.h) 
+} 
+else num.h <- length(h.seq)
+
+
 GCV <- rep(0, num.h)
 h.GCV <- data.frame(h=0)
-  
-  
 
-a <- as.matrix(abs(outer(t, t,"-")))
-for (i in 1:n) {a[i,i] <- -1000}
-a <- as.vector(a[a!=-1000])
-  
-h.min <- quantile(a,0.05)
-h.max <- (max(t)-min(t))*0.25
-  
-h.seq <- seq(h.min, h.max, length.out=num.h)
-  
-  
   
 W.g <- function(t=t, g=NULL, estimator=estimator, kernel.function=kernel.function)
 {

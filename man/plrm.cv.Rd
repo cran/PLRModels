@@ -8,14 +8,16 @@ Cross-validation bandwidth selection in PLR models
 From a sample \eqn{{(Y_i, X_{i1}, ..., X_{ip}, t_i): i=1,...,n}}, this routine computes, for each \eqn{l_n} considered, an optimal pair of bandwidths for estimating the regression function of the model
 \deqn{Y_i= X_{i1}*\beta_1 +...+ X_{ip}*\beta_p + m(t_i) + \epsilon_i,}
 where
-\deqn{\beta = (\beta_1,...,\beta_p)\;is\;an\;unknown\;vector\;parameter}
-and
-\deqn{m(.)\;is\;a\;smooth\;but\;unknown\;function.}
-The random errors, \eqn{{\epsilon_i}}, are allowed to be time series. The optimal pair of bandwidths, (\code{b.opt, h.opt}), is selected by means of the leave-(\eqn{2l_n + 1})-out cross-validation procedure. The bandwidth \code{b.opt} is used in the estimate of \eqn{\beta}, while the pair of bandwidths \code{(b.opt, h.opt)} is considered in the estimate of \eqn{m}. Kernel smoothing, combined with ordinary least squares estimation, is used.
+\deqn{\beta = (\beta_1,...,\beta_p)}
+is an unknown vector parameter and
+\deqn{m(.)}
+is a smooth but unknown function.
+The random errors, \eqn{\epsilon_i}, are allowed to be time series. The optimal pair of bandwidths, (\code{b.opt, h.opt}), is selected by means of the leave-(\eqn{2l_n + 1})-out cross-validation procedure. The bandwidth \code{b.opt} is used in the estimate of \eqn{\beta}, while the pair of bandwidths \code{(b.opt, h.opt)} is considered in the estimate of \eqn{m}. Kernel smoothing, combined with ordinary least squares estimation, is used.
 }
 \usage{
-plrm.cv(data = data, b.equal.h = TRUE, num.b = NULL, num.h = NULL, w = NULL, 
-num.ln = 1, ln.0 = 0, step.ln = 2, estimator = "NW", kernel = "quadratic")
+plrm.cv(data = data, b.equal.h = TRUE, b.seq=NULL, h.seq=NULL, 
+num.b = NULL, num.h = NULL, w = NULL, num.ln = 1, ln.0 = 0, 
+step.ln = 2, estimator = "NW", kernel = "quadratic")
 }
 \arguments{
   \item{data}{
@@ -28,8 +30,10 @@ num.ln = 1, ln.0 = 0, step.ln = 2, estimator = "NW", kernel = "quadratic")
 \code{data[, p+2]} contains the values of the "nonparametric" explanatory variable, \eqn{t}.
 }
   \item{b.equal.h}{if TRUE (the default), the same bandwidth is used for estimating both \eqn{\beta} and \eqn{m}.}
-  \item{num.b}{number of values used to build the sequence of considered bandwidths for estimating \eqn{\beta}. If both \code{num.b} and \code{num.h} are \code{NULL} (the default), \code{num.b=50} is considered; if \code{num.b} is \code{NULL} (the default) but \code{num.h} is not \code{NULL}, \code{num.b=num.h} is considered; if \code{b.equal.h=TRUE} (the default) and both \code{num.b} and \code{num.h} are not \code{NULL} and different, the maximum value of \code{num.b} and \code{num.h} is considered for both.}
-  \item{num.h}{pairs of bandwidths (\code{b, h}) are used for estimating \eqn{m}, \code{num.h} being the number of values considered for \code{h}. If both \code{num.b} and \code{num.h} are \code{NULL} (the default), \code{num.h=50} is considered; if \code{num.h} is \code{NULL} (the default) but \code{num.b} is not \code{NULL}, \code{num.h=num.b} is considered; if \code{b.equal.h=TRUE} (the default) and both \code{num.b} and \code{num.h} are not \code{NULL} and different, the maximum value of \code{num.b} and \code{num.h} is considered for both.}
+  \item{b.seq}{sequence of considered bandwidths, \code{b}, in the CV function for estimating \eqn{\beta}. If \code{NULL} (the default), \code{num.b} equidistant values between zero and a quarter of the range of \eqn{{t_i}} are considered.}
+  \item{h.seq}{sequence of considered bandwidths, \code{h}, in the pair of bandwidths \code{(b, h)} used in the CV function for estimating \eqn{m}. If \code{NULL} (the default), \code{num.h} equidistant values between zero and a quarter of the range of \eqn{t_i} are considered.}
+  \item{num.b}{number of values used to build the sequence of considered bandwidths for estimating \eqn{\beta}. If \code{b.seq} is not \code{NULL}, \code{num.b=length(b.seq)}. Otherwise, if both \code{num.b} and \code{num.h} are \code{NULL} (the default), \code{num.b=50} is considered; if \code{num.b} is \code{NULL} (the default) but \code{num.h} is not \code{NULL}, then \code{num.b=num.h} is considered; if \code{b.equal.h=TRUE} (the default) and both \code{num.b} and \code{num.h} are not \code{NULL} and different, the maximum value of \code{num.b} and \code{num.h} is considered for both.}
+  \item{num.h}{pairs of bandwidths (\code{b, h}) are used for estimating \eqn{m}, \code{num.h} being the number of values considered for \code{h}. If \code{h.seq} is not \code{NULL}, \code{num.h=length(h.seq)}. Otherwise, if both \code{num.b} and \code{num.h} are \code{NULL} (the default), \code{num.h=50} is considered; if \code{num.h} is \code{NULL} (the default) but \code{num.b} is not \code{NULL}, \code{num.h=num.b} is considered; if \code{b.equal.h=TRUE} (the default) and both \code{num.b} and \code{num.h} are not \code{NULL} and different, the maximum value of \code{num.b} and \code{num.h} is considered for both.}
 \item{w}{support interval of the weigth function in the CV function. If \code{NULL} (the default), \eqn{(q_{0.1}, q_{0.9})} is considered, where \eqn{q_p} denotes the quantile of order \eqn{p} of \eqn{{t_i}}.}
   \item{num.ln}{number of values for \eqn{l_n}: after estimating \eqn{\beta}, \eqn{2l_{n} + 1} observations around each point \eqn{t_i} are eliminated to estimate \eqn{m(t_i)} in the CV function. The default is 1.}
   \item{ln.0}{minimum value for \eqn{l_n}. The default is 0.}
@@ -49,8 +53,8 @@ The implemented procedure generalizes that one in expression (8) in Aneiros-Pere
 \item{bh.opt}{dataframe containing, for each \code{ln} considered, the selected value for \code{(b,h)}.}
 \item{CV.opt}{\code{CV.opt[k]} is the minimum value of the CV function when de k-th value of \code{ln} is considered.}
 \item{CV}{an array containing the values of the CV function for each pair of bandwidths and \code{ln} considered.}
-\item{b.seq}{sequence of considered bandwidths, \code{b}, in the CV function for estimating \eqn{\beta}: \code{num.b} equidistant values between zero and a quarter of the range of \eqn{{t_i}}.}
-\item{h.seq}{sequence of considered bandwidths, \code{h}, in the pair of bandwidths \code{(b, h)} used in the CV function for estimating \eqn{m}: \code{num.h} equidistant values between zero and a quarter of the range of \eqn{{t_i}}.}
+\item{b.seq}{sequence of considered bandwidths, \code{b}, in the CV function for estimating \eqn{\beta}.}
+\item{h.seq}{sequence of considered bandwidths, \code{h}, in the pair of bandwidths \code{(b, h)} used in the CV function for estimating \eqn{m}.}
 \item{w}{support interval of the weigth function in the CV function.}
 }
 \references{
@@ -67,9 +71,26 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are: \code{\link{plrm.beta}}, \code{\link{plrm.est}}, \code{\link{plrm.gcv}}, \code{\link{np.est}}, \code{\link{np.gcv}} and \code{\link{np.cv}}.
 }
 \examples{
-set.seed(1234)
+# EXAMPLE 1: REAL DATA
+data(barnacles1)
+data <- as.matrix(barnacles1)
+data <- diff(data, 12)
+data <- cbind(data,1:nrow(data))
 
-## Example 1: independent data
+aux <- plrm.cv(data, step.ln=1, num.ln=2)
+aux$bh.opt
+plot.ts(aux$CV[,-2,])
+
+par(mfrow=c(2,1))
+plot(aux$b.seq,aux$CV[,-2,1], xlab="h", ylab="CV", type="l", main="ln=0")
+plot(aux$b.seq,aux$CV[,-2,2], xlab="h", ylab="CV", type="l", main="ln=1")
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: independent data
+
+set.seed(1234)
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n
@@ -92,7 +113,9 @@ h <- a$h.seq
 plot(h, CV,type="l")
 
 
-## Example 2: dependent data and ln.0 > 0
+## Example 2b: dependent data and ln.0 > 0
+
+set.seed(1234)
 # We generate the data
 x <- matrix(rnorm(200,0,1), nrow=n)
 sum <- x\%*\%beta

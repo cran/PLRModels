@@ -1,6 +1,6 @@
 
-plrm.est <- function(data=data, b=NULL, h=NULL, newt=NULL, estimator="NW", 
-                     kernel = "quadratic")
+plrm.est <- function(data=data, b=NULL, h=NULL, newt=NULL, 
+                     estimator="NW", kernel = "quadratic")
 {
 
 if (!is.matrix(data))  stop("data must be a matrix")
@@ -24,7 +24,7 @@ if ((kernel != "quadratic") & (kernel != "Epanechnikov") & (kernel != "triweight
 
   
 if ( (is.null(b)) & (is.null(h)) ) {
-  b <- plrm.gcv(data=data, estimator=estimator, kernel=kernel)$bh.opt[1]                                                                                                          
+  b <- plrm.cv(data=data, estimator=estimator, kernel=kernel)$bh.opt[2,1]    
   h <- b}
 
 else if ( (!is.null(b)) & (is.null(h)) ) h <- b
@@ -38,6 +38,7 @@ n <- nrow(data)
 p <- ncol(data)-2
 y <- data[, 1]
 x <- data[, 2:(p+1)]
+if (!is.matrix(x)) x <- as.matrix(x)
 t <- data[, p+2]
   
 
@@ -46,7 +47,7 @@ if (!is.null(newt)) {m.newt <- rep(0, length(newt))}
 m.t <- rep(0,length=n)
   
 
-
+y <- as.vector(y)
 data2 <- y-x%*%beta
 data3 <- cbind(data2,t)
 if (!is.null(newt)) {m.newt <- np.est(data=data3, h.seq=h, newt=newt, estimator=estimator, kernel=kernel)}

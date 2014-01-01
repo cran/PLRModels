@@ -153,6 +153,8 @@ if ((is.null(Var.Cov.eps)) | (is.null(Tau.eps))) {
 }
   
 if (is.null(Var.Cov.eps)) {
+  
+    v.c.eps <- TRUE
    	
 		Var.Cov.eps <- array(0,c(n,n,L))
 		
@@ -170,29 +172,37 @@ if (is.null(Var.Cov.eps)) {
     else {    
 
    		for (k in 1:L) {
-
-					V.eps <- var.cov.matrix(x=eps.0[,k], n=n, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
-
-					if (!is.matrix(V.eps)) stop("The automatic criterion does not provide an ARMA model for the residuals. It is necessary to input the Var.Cov.eps matrix")
-		
+					V.eps <- matrix(NA, n, n)
+					Var.Cov.mat <- var.cov.matrix(x=eps.0[,k], n=n, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
+					
+					V.eps <- Var.Cov.mat[[1]]
+					v.pv.Box.test <- Var.Cov.mat[[2]]
+					v.pv.t.test <- Var.Cov.mat[[3]]
+          v.ar.ma <- Var.Cov.mat[[4]]
+          
 					Var.Cov.eps[,,k] <- V.eps
 			} # for
 		} # else
 } # if
-
+else v.c.eps <- FALSE
 
 if (is.null(Tau.eps)) {
+  
+    t.eps <- TRUE
   		
 		if (!time.series) Tau.eps <- apply(eps.0, 2, var)  
 	
     	else {    
-				Tau.eps <- var.cov.sum(X=eps.0, lag.max=lag.max, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
-
-				if (!is.numeric(Tau.eps)) stop("The automatic criterion does not provide an ARMA model for the residuals. It is necessary to input the Tau.eps matrix")
-		
+				Var.Cov.sum <- var.cov.sum(X=eps.0, lag.max=lag.max, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
+				       
+				Tau.eps <- Var.Cov.sum[[1]]
+				t.pv.Box.test <- Var.Cov.sum[[2]]
+				t.pv.t.test <- Var.Cov.sum[[3]]
+        t.ar.ma <- Var.Cov.sum[[4]]
+				
 			} # else
 } # if
-
+else t.eps <- FALSE
 
 #####################################
 # PARAMETRIC AND NON-PARAMETRIC TEST
@@ -240,7 +250,7 @@ for (i in 1:num.b) {
 # We test BETA_1= ... =BETA_L
 par.test <- par.ancova(data=data_par1, time.series=time.series, Var.Cov.eps=Var.Cov.eps, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb) 
 
-parametric.test[i,]  <- c(b.seq[i], par.test$Q.beta, par.test$p.value)
+parametric.test[i,]  <- c(b.seq[i], par.test$par.ancova$Q.beta, par.test$par.ancova$p.value)
     
     
 # We test m_1=m_2=...=m_L
@@ -249,7 +259,7 @@ data_nopar2 <- matrix(c(Y,t),nrow=n)
 np.test <- np.ancova(data=data_nopar2, h0=h0, h.seq=h.seq[i], w=w, estimator=estimator, kernel=kernel,
                      time.series=time.series, Tau.eps=Tau.eps, lag.max=lag.max, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
 
-nonparametric.test[i,]  <- c(b.seq[i], h.seq[i], np.test[,2], np.test[,3], np.test[,4])
+nonparametric.test[i,]  <- c(b.seq[i], h.seq[i], np.test$np.ancova$Q.m, np.test$np.ancova$Q.m.normalised, np.test$np.ancova$p.value)
         
 } # for
 
@@ -257,7 +267,11 @@ nonparametric.test[i,]  <- c(b.seq[i], h.seq[i], np.test[,2], np.test[,3], np.te
 parametric.test <- as.data.frame(parametric.test)
 nonparametric.test <- as.data.frame(nonparametric.test)
 
-list(parametric.test=parametric.test, nonparametric.test=nonparametric.test)
   
+if ( (v.c.eps) && (t.eps) && (time.series) ) list(parametric.test=parametric.test, nonparametric.test=nonparametric.test, pv.Box.test=v.pv.Box.test, pv.t.test=v.pv.t.test, v.ar.ma=v.ar.ma)
+else if ( !(v.c.eps) && (t.eps) && (time.series) ) list(parametric.test=parametric.test, nonparametric.test=nonparametric.test, pv.Box.test=t.pv.Box.test, pv.t.test=t.pv.t.test, ar.ma=t.ar.ma)
+else if ( (v.c.eps) && !(t.eps) && (time.series) ) list(parametric.test=parametric.test, nonparametric.test=nonparametric.test, pv.Box.test=v.pv.Box.test, pv.t.test=v.pv.t.test, ar.ma=v.ar.ma)
+else list(parametric.test=parametric.test, nonparametric.test=nonparametric.test)
+
 }
 

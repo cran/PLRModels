@@ -1,5 +1,5 @@
 
-plrm.gcv <- function(data=data, b.equal.h=TRUE, num.b=NULL, num.h=NULL, 
+plrm.gcv <- function(data=data, b.equal.h=TRUE, b.seq=NULL, h.seq=NULL, num.b=NULL, num.h=NULL, 
                      estimator="NW", kernel="quadratic")
 {
 
@@ -7,6 +7,12 @@ if (!is.matrix(data))  stop("data must be a matrix")
 if (ncol(data)<3)  stop("data must have at least 3 columns: y, x, t")
 
 if (!is.logical(b.equal.h)) stop("b.equal.h must be logical")
+
+if ( (!is.null(b.seq)) && (sum(is.na(b.seq))  != 0) ) stop ("b.seq must be numeric")
+if ( (!is.null(b.seq)) && (any(b.seq<=0)) ) stop ("b.seq must contain one ore more positive values")
+
+if ( (!is.null(h.seq)) && (sum(is.na(h.seq))  != 0) ) stop ("h.seq must be numeric")
+if ( (!is.null(h.seq)) && (any(h.seq<=0)) ) stop ("h.seq must contain one ore more positive values")
 
 if ( (!is.null(num.b)) && (length(num.b) !=1) ) stop ("num.b must be an only value") 
 if ( (!is.null(num.b)) && (!is.numeric(num.b)) )  stop ("num.b must be numeric") 
@@ -39,23 +45,78 @@ else if ((b.equal.h==FALSE) & ((is.null(num.b)) & (!is.null(num.h))) ) num.b <- 
 else if ((b.equal.h==FALSE) & (is.null(num.b)) & (is.null(num.h)) ) {num.b <- 50; num.h <- num.b}
 
 
+  
+if ( is.null(b.seq) && is.null(h.seq) ) {
+    a <- as.matrix(abs(outer(t, t,"-")))
+    for (i in 1:n) {a[i,i] <- -1000}
+    a <- as.vector(a[a!=-1000])
+  
+    b.min <- quantile(a,0.05)
+    b.max <- (max(t)-min(t))*0.25
+  
+    b.seq <- seq(b.min,b.max,length.out=num.b)
+    h.seq <- seq(b.min,b.max,length.out=num.h)
+}
+
+else if ( !is.null(b.seq) && !is.null(h.seq) && !b.equal.h) {
+  num.b <- length(b.seq)
+  num.h <- length(h.seq)
+} 
+
+else if ( !is.null(b.seq) && !is.null(h.seq) && b.equal.h) {
+  c <- b.seq==h.seq
+  if (any(c==FALSE)) stop("b.seq and h.seq are not equal")
+  if ( length(b.seq) != length(h.seq) ) stop("b.seq and h.seq have different lengths")
+  num.b <- length(b.seq)
+  num.h <- length(h.seq)
+} 
+
+else if ( is.null(b.seq) && !is.null(h.seq) && b.equal.h ) {
+  b.seq <- h.seq
+  num.b <- length(h.seq)
+  num.h <- length(h.seq)
+} 
+
+else if ( !is.null(b.seq) && is.null(h.seq) && b.equal.h ) {
+  h.seq <- b.seq
+  num.b <- length(b.seq)
+  num.h <- length(b.seq)
+} 
+
+
+else if ( is.null(b.seq) && !is.null(h.seq) && !b.equal.h ) {
+  num.h <- length(h.seq)
+  
+  a <- as.matrix(abs(outer(data[,p+2], data[,p+2],"-")))
+  for (i in 1:n) {a[i,i] <- -1000}
+  a <- as.vector(a[a!=-1000])
+  
+  b.min <- quantile(a,0.05)
+  b.max <- (max(t)-min(t))*0.25
+  
+  b.seq <- seq(b.min,b.max,length.out=num.b)
+} 
+
+else if ( !is.null(b.seq) && is.null(h.seq) && !b.equal.h ) {
+  num.b <- length(b.seq)
+  
+  a <- as.matrix(abs(outer(data[,p+2], data[,p+2],"-")))
+  for (i in 1:n) {a[i,i] <- -1000}
+  a <- as.vector(a[a!=-1000])
+  
+  b.min <- quantile(a,0.05)
+  b.max <- (max(t)-min(t))*0.25
+  
+  h.seq <- seq(b.min,b.max,length.out=num.h)
+} 
+
+
+
 if (b.equal.h) GCV <- matrix(0,num.b, 1)
 else GCV <- matrix(0,num.b, num.h)
 
 b.h.GCV <- data.frame(cbind(b=0,h=0))
 
-  
-  
-a <- as.matrix(abs(outer(t, t,"-")))
-for (i in 1:n) {a[i,i] <- -1000}
-a <- as.vector(a[a!=-1000])
-  
-b.min <- quantile(a,0.05)
-b.max <- (max(t)-min(t))*0.25
-  
-b.seq <- seq(b.min,b.max,length.out=num.b)
-h.seq <- seq(b.min,b.max,length.out=num.h)
-    
 
 
 W.g <- function(t=t, g=NULL, estimator=estimator, kernel.function=kernel.function)

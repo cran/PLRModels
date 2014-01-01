@@ -8,8 +8,8 @@ This routine computes estimates for \eqn{m(newt_j)} (\eqn{j=1,...,J}) from a sam
 The regression function, \eqn{m}, is a smooth but unknown function, and the random errors, \eqn{{\epsilon_i}}, are allowed to be time series. Kernel smoothing is used.
 }
 \usage{
-np.est(data = data, h.seq = NULL, newt = NULL, estimator = "NW", 
-kernel = "quadratic")
+np.est(data = data, h.seq = NULL, newt = NULL,
+estimator = "NW", kernel = "quadratic")
 }
 \arguments{
  \item{data}{
@@ -17,7 +17,7 @@ kernel = "quadratic")
 
 \code{data[, 2]} contains the values of the explanatory variable, \eqn{t}.
 }
-  \item{h.seq}{the considered bandwidths. If \code{NULL} (the default), only one bandwidth, selected by means of the generalized cross-validation procedure, is used.}
+  \item{h.seq}{the considered bandwidths. If \code{NULL} (the default), only one bandwidth, selected by means of the cross-validation procedure, is used.}
   \item{newt}{values of the explanatory variable where the estimates are obtained. If NULL (the default), the considered values will be the values of \code{data[,2]}.}
   \item{estimator}{allows us the choice between \dQuote{NW} (Nadaraya-Watson) or \dQuote{LLP} (Local Linear Polynomial). The default is \dQuote{NW}.}
   \item{kernel}{allows us the choice between \dQuote{gaussian}, \dQuote{quadratic} (Epanechnikov kernel), \dQuote{triweight} or \dQuote{uniform} kernel. The default is \dQuote{quadratic}.}
@@ -45,9 +45,29 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are: \code{\link{np.gcv}}, \code{\link{np.cv}}, \code{\link{plrm.est}}, \code{\link{plrm.gcv}} and \code{\link{plrm.cv}}.
 }
 \examples{
-set.seed(1234)
+# EXAMPLE 1: REAL DATA
+data <- matrix(10,120,2)
+data(barnacles1)
+barnacles1 <- as.matrix(barnacles1)
+data[,1] <- barnacles1[,1]
+data <- diff(data, 12)
+data[,2] <- 1:nrow(data)
 
-## Example: independent data
+aux <- np.gcv(data)
+h <- aux$h.opt
+ajuste <- np.est(data=data, h=h)
+plot(data[,2], ajuste, type="l", xlab="t", ylab="m(t)")
+plot(data[,1], ajuste, xlab="y", ylab="y.hat", main="y.hat vs y")
+abline(0,1)
+residuos <- data[,1] - ajuste
+mean(residuos^2)/var(data[,1])
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: independent data
+
+set.seed(1234)
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n
@@ -59,7 +79,7 @@ y <-  f + epsilon
 data_ind <- matrix(c(y,t),nrow=100)
 
 # We estimate the nonparametric component of the PLR model
-# (GCV bandwidth)
+# (CV bandwidth)
 est <- np.est(data_ind)
 plot(t, est, type="l", lty=2, ylab="")
 points(t, 0.25*t*(1-t), type="l")

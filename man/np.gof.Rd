@@ -10,9 +10,10 @@ This routine tests the equality of a nonparametric regression curve, \eqn{m}, an
 The unknown function \eqn{m} is smooth, fixed equally spaced design is considered, and the random errors, \eqn{{\epsilon_i}}, are allowed to be time series. The test statistic used for testing the null hypothesis, \eqn{H0: m = m_0}, derives from a Cramer-von-Mises-type functional distance between a nonparametric estimator of \eqn{m} and \eqn{m_0}.
 }
 \usage{
-np.gof(data = data, m0 = NULL, h.seq = NULL, w = NULL, estimator = "NW", 
-kernel = "quadratic", time.series = FALSE, Tau.eps = NULL, h0 = NULL, 
-lag.max = 50, p.max = 3, q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
+np.gof(data = data, m0 = NULL, h.seq = NULL, w = NULL, 
+estimator = "NW", kernel = "quadratic", time.series = FALSE, 
+Tau.eps = NULL, h0 = NULL, lag.max = 50, p.max = 3, 
+q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
 }
 \arguments{
  \item{data}{
@@ -38,15 +39,19 @@ lag.max = 50, p.max = 3, q.max = 3, ic = "BIC", num.lb = 10, alpha = 0.05)
 \details{
 A weight function (specifically, the indicator function \bold{1}\eqn{_{[w[1] , w[2]]}}) is introduced in the test statistic to allow elimination (or at least significant reduction) of boundary effects from the estimate of \eqn{m(t_i)}.
 
-If \code{Tau.eps=NULL} and the routine is not able to suggest an approximation for \code{Tau.eps}, the program stops and a value for \code{Tau.eps} is required. In order to construct \code{Tau.eps}, the procedures suggested in Muller and Stadmuller (1988) and Herrmann \emph{et al.} (1992) can be followed.
+If \code{Tau.eps=NULL} and the routine is not able to suggest an approximation for \code{Tau.eps}, it warns the user with a message saying that the model could be not appropriate and then it shows the results. In order to construct \code{Tau.eps}, the procedures suggested in Muller and Stadmuller (1988) and Herrmann \emph{et al.} (1992) can be followed.
 
 The implemented statistic test particularizes that one in Gonzalez Manteiga and Vilar Fernandez (1995) to the case where the considered class in the null hypothesis has only one element.
 }
-\value{A dataframe containing:
+\value{A list with a dataframe containing:
   \item{h.seq}{sequence of bandwidths used in the test statistic.}
   \item{Q.m}{values of the test statistic (one for each bandwidth in \code{h.seq}).}
   \item{Q.m.normalised}{normalised value of Q.m.}
   \item{p.value}{p-values of the corresponding statistic tests (one for each bandwidth in \code{h.seq}).}
+  Moreover, if \code{data} is a time series and \code{Tau.eps} is not especified:
+  \item{pv.Box.test}{p-values of the Ljung-Box test for the model fitted to the residuals.}
+  \item{pv.t.test}{p-values of the t.test for the model fitted to the residuals.}
+  \item{ar.ma}{ARMA orders for the model fitted to the residuals.}
 }
 \references{
 Biedermann, S. and Dette, H. (2000) Testing linearity of regression models with dependent errors by kernel based methods. \emph{Test} \bold{9}, 417-438.
@@ -68,10 +73,22 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are \code{\link{np.est}}, \code{\link{par.gof}} and \code{\link{plrm.gof}}.
 }
 \examples{
-### Example: dependent data
+# EXAMPLE 1: REAL DATA
+data <- matrix(10,120,2)
+data(barnacles1)
+barnacles1 <- as.matrix(barnacles1)
+data[,1] <- barnacles1[,1]
+data <- diff(data, 12)
+data[,2] <- 1:nrow(data)
+
+np.gof(data)
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: dependent data
 
 set.seed(1234)
-
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n
@@ -83,10 +100,10 @@ epsilon <- arima.sim(list(order = c(1,0,0), ar=0.7), sd = 0.01, n = n)
 y <-  f + epsilon
 data <- cbind(y,t)
 
-## Example 1: true null hypothesis
+## Example 2a.1: true null hypothesis
 np.gof(data, m0=f.function, time.series=TRUE)
 
-## Example 2: false null hypothesis
+## Example 2a.2: false null hypothesis
 np.gof(data, time.series=TRUE) 
 
 }

@@ -1,12 +1,18 @@
 
-plrm.cv <- function(data=data, b.equal.h=TRUE, num.b=NULL, num.h=NULL, w=NULL, 
-                    num.ln=1, ln.0=0, step.ln=2, estimator="NW", kernel="quadratic")
+plrm.cv <- function(data=data, b.equal.h=TRUE, b.seq=NULL, h.seq=NULL, num.b=NULL, num.h=NULL,
+                    w=NULL, num.ln=1, ln.0=0, step.ln=2, estimator="NW", kernel="quadratic")
 {
 
 if (!is.matrix(data))  stop("data must be a matrix")
 if (ncol(data)<3)  stop("data must have at least 3 columns: y, x, t")
   
 if (!is.logical(b.equal.h)) stop("b.equal.h must be logical")
+
+if ( (!is.null(b.seq)) && (sum(is.na(b.seq))  != 0) ) stop ("b.seq must be numeric")
+if ( (!is.null(b.seq)) && (any(b.seq<=0)) ) stop ("b.seq must contain one ore more positive values")
+
+if ( (!is.null(h.seq)) && (sum(is.na(h.seq))  != 0) ) stop ("h.seq must be numeric")
+if ( (!is.null(h.seq)) && (any(h.seq<=0)) ) stop ("h.seq must contain one ore more positive values")
 
 if ( (!is.null(num.b)) && (length(num.b) !=1) ) stop ("num.b must be an only value") 
 if ( (!is.null(num.b)) && (!is.numeric(num.b)) )  stop ("num.b must be numeric") 
@@ -48,10 +54,12 @@ n <- nrow(data)
 p <- ncol(data)-2
 y <- data[, 1]
 x <- data[, 2:(1+p)]
+if (!is.matrix(x)) x <- as.matrix(x)
 t <- data[, p+2]
 
 
 if (is.null(w)) w <- c(quantile(data[,p+2],0.1), quantile(data[,p+2],0.9))
+
 
 
 if ((b.equal.h==TRUE) & ((!is.null(num.b)) | (!is.null(num.h))) ) {num.b <- max(num.b, num.h); num.h <- num.b}
@@ -61,39 +69,94 @@ else if ((b.equal.h==FALSE) & ((is.null(num.b)) & (!is.null(num.h))) ) num.b <- 
 else if ((b.equal.h==FALSE) & (is.null(num.b)) & (is.null(num.h)) ) {num.b <- 50; num.h <- num.b}
 
 
+if ( is.null(b.seq) && is.null(h.seq) ) {
+    a <- as.matrix(abs(outer(data[,p+2], data[,p+2],"-")))
+    for (i in 1:n) {a[i,i] <- -1000}
+    a <- as.vector(a[a!=-1000])
+
+    b.min <- quantile(a,0.05)
+    b.max <- (max(t)-min(t))*0.25
+
+    b.seq <- seq(b.min,b.max,length.out=num.b)
+  
+    h.seq <- seq(b.min,b.max,length.out=num.h)
+}
+
+else if ( !is.null(b.seq) && !is.null(h.seq) && !b.equal.h) {
+  num.b <- length(b.seq)
+  num.h <- length(h.seq)
+} 
+
+else if ( !is.null(b.seq) && !is.null(h.seq) && b.equal.h) {
+  c <- b.seq==h.seq
+  if (any(c==FALSE)) stop("The input arguments b.seq and h.seq are not equal")
+  if ( length(b.seq) != length(h.seq) ) stop("The input arguments b.seq and h.seq have different lengths")
+  num.b <- length(b.seq)
+  num.h <- length(h.seq)
+} 
+
+else if ( is.null(b.seq) && !is.null(h.seq) && b.equal.h ) {
+  b.seq <- h.seq
+  num.b <- length(h.seq)
+  num.h <- length(h.seq)
+} 
+
+else if ( !is.null(b.seq) && is.null(h.seq) && b.equal.h ) {
+  h.seq <- b.seq
+  num.b <- length(b.seq)
+  num.h <- length(b.seq)
+} 
+
+else if ( is.null(b.seq) && !is.null(h.seq) && !b.equal.h ) {
+  num.h <- length(h.seq)
+  
+  a <- as.matrix(abs(outer(data[,p+2], data[,p+2],"-")))
+  for (i in 1:n) {a[i,i] <- -1000}
+  a <- as.vector(a[a!=-1000])
+  
+  b.min <- quantile(a,0.05)
+  b.max <- (max(t)-min(t))*0.25
+  
+  b.seq <- seq(b.min,b.max,length.out=num.b)
+} 
+
+else if ( !is.null(b.seq) && is.null(h.seq) && !b.equal.h ) {
+  num.b <- length(b.seq)
+  
+  a <- as.matrix(abs(outer(data[,p+2], data[,p+2],"-")))
+  for (i in 1:n) {a[i,i] <- -1000}
+  a <- as.vector(a[a!=-1000])
+  
+  b.min <- quantile(a,0.05)
+  b.max <- (max(t)-min(t))*0.25
+  
+  h.seq <- seq(b.min,b.max,length.out=num.h)
+} 
+
+
+
 if (b.equal.h==TRUE) num.hh <- 1
 else num.hh <- num.h
+
 
 
 CV <- array(0,c(num.b, num.hh, num.ln))
 CV.opt <- 1:num.ln
 b.h.CV <- data.frame(matrix(0,3,num.ln),row.names=c("ln","b","h"))
-
-
-if (!is.matrix(x))  x <- as.matrix(x)
-
-
-
-a <- as.matrix(abs(outer(data[,p+2], data[,p+2],"-")))
-for (i in 1:n) {a[i,i] <- -1000}
-a <- as.vector(a[a!=-1000])
-
-b.min <- quantile(a,0.05)
-b.max <- (max(t)-min(t))*0.25
-
-b.seq <- seq(b.min,b.max,length.out=num.b)
-  
-h.seq <- seq(b.min,b.max,length.out=num.h)
   
 ele.seq <- seq(from = ln.0, to =ln.0+(num.ln-1)*step.ln , by = step.ln)
-  
-BETAmat <- plrm.beta(data=data, b.seq=b.seq, estimator=estimator, kernel=kernel)$BETA
-if (!is.matrix(BETAmat))  BETAmat <- t(as.matrix(BETAmat))
-  
 
-  
+
+
+BETAmat <- plrm.beta(data=data, b.seq=b.seq, estimator=estimator, kernel=kernel)$BETA
+
+
+if (!is.matrix(BETAmat))  BETAmat <- t(as.matrix(BETAmat))
+y <- as.vector(y)
 YXB.mat <- y -x%*%BETAmat
-  
+
+
+
 if (estimator=="NW")
     
    for (k in 1:num.ln) {

@@ -138,9 +138,15 @@ if (is.null(Tau.eps)) {
 
 		if (!time.series) Tau.eps.0 <- apply(eps.0,2,var)
 
-		else Tau.eps.0 <- var.cov.sum(X=eps.0, lag.max=lag.max, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
+		else  {Var.Cov.sum <- var.cov.sum(X=eps.0, lag.max=lag.max, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
+
+		Tau.eps.0 <- Var.Cov.sum[[1]]
+		pv.Box.test <- Var.Cov.sum[[2]]
+		pv.t.test <- Var.Cov.sum[[3]]
+    ar.ma <- Var.Cov.sum[[4]]
+		}
     
-		if (!is.numeric(Tau.eps.0)) stop("The automatic criterion does not provide an ARMA model for the residuals. It is necessary to input the Tau.eps matrix")
+    
 }
 
 else Tau.eps.0 <- Tau.eps
@@ -166,7 +172,9 @@ for (j in 1:num.h) {
   
 }
   
-data.frame(h.seq=h.seq, Q.m=Q.m, Q.m.normalised=Q.m.normalised, p.value=p.value)
+
+if ((is.null(Tau.eps)) && (time.series)) list(np.ancova=data.frame(h.seq=h.seq, Q.m=Q.m, Q.m.normalised=Q.m.normalised, p.value=p.value), pv.Box.test=pv.Box.test, pv.t.test=pv.t.test, ar.ma=ar.ma)
+else list(np.ancova=data.frame(h.seq=h.seq, Q.m=Q.m, Q.m.normalised=Q.m.normalised, p.value=p.value))
   
 }
   

@@ -1,5 +1,6 @@
 
-plrm.beta <- function(data=data, b.seq=NULL, estimator="NW", kernel = "quadratic")
+plrm.beta <- function(data=data, b.seq=NULL, 
+                      estimator="NW", kernel = "quadratic")
 {
 
 if (!is.matrix(data))  stop("data must be a matrix")
@@ -18,17 +19,17 @@ n <- nrow(data)
 p <- ncol(data)-2
 y <- data[,1]
 x <- data[,2:(p+1)]
+if (!is.matrix(x)) x <- as.matrix(x)
 t <- data[,p+2]
 
-if (is.null(b.seq)) b.seq <- plrm.gcv(data=data, estimator=estimator, kernel=kernel)$bh.opt[1]
-num.b <- length(b.seq)     
+
+if (is.null(b.seq)) b.seq <- plrm.cv(data=data, estimator=estimator, kernel=kernel)$bh.opt[2,1]
+num.b <- length(b.seq)
+
      
 XX <- array(0,c(n,p,num.b))
 G <- array(0,c(n,p,num.b))
 BETA <- matrix(0,p,num.b)
- 
-if (!is.matrix(x)) as.matrix(x)
-
 
 
 for (j in 1:p) {
@@ -39,6 +40,7 @@ for (j in 1:p) {
 } # for
 
 
+y <- as.vector(y)
 YY <- y-np.est(data=data[,c(1,p+2)], newt=t, h.seq=b.seq, estimator=estimator, kernel=kernel)
 
 

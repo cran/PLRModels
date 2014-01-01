@@ -10,7 +10,8 @@ From a sample \eqn{{(Y_i, t_i): i=1,...,n}}, this routine computes an optimal ba
 The regression function, \eqn{m}, is a smooth but unknown function. The optimal bandwidth is selected by means of the generalized cross-validation procedure. Kernel smoothing is used.
 }
 \usage{
-np.gcv(data = data, num.h = 50, estimator = "NW", kernel = "quadratic")
+np.gcv(data = data, h.seq=NULL, num.h = 50, estimator = "NW", 
+kernel = "quadratic")
 }
 \arguments{
  \item{data}{
@@ -18,7 +19,8 @@ np.gcv(data = data, num.h = 50, estimator = "NW", kernel = "quadratic")
 
 \code{data[, 2]} contains the values of the explanatory variable, \eqn{t}.
 }
-  \item{num.h}{number of values used to build the sequence of considered bandwidths. The default is 50.}
+  \item{h.seq}{sequence of considered bandwidths in the GCV function. If \code{NULL} (the default), \code{num.h} equidistant values between zero and a quarter of the range of \eqn{t_i} are considered.}
+  \item{num.h}{number of values used to build the sequence of considered bandwidths. If \code{h.seq} is not \code{NULL}, \code{num.h=length(h.seq)}. Otherwise, the default is 50.}
   \item{estimator}{allows us the choice between \dQuote{NW} (Nadaraya-Watson) or \dQuote{LLP} (Local Linear Polynomial). The default is \dQuote{NW}.}
   \item{kernel}{allows us the choice between \dQuote{gaussian}, \dQuote{quadratic} (Epanechnikov kernel), \dQuote{triweight} or \dQuote{uniform} kernel. The default is \dQuote{quadratic}.}
 }
@@ -30,7 +32,7 @@ See Craven and Wahba (1979) and Rice (1984).
 \item{h.opt}{selected value for the bandwidth.}
 \item{GCV.opt}{minimum value of the GCV function.}
 \item{GCV}{vector containing the values of the GCV function for each considered bandwidth.}
-\item{h.seq}{sequence of considered bandwidths in the GCV function: \code{num.h} equidistant values between zero and a quarter of the range of \eqn{{t_i}}.}
+\item{h.seq}{sequence of considered bandwidths in the GCV function.}
 }
 \references{
 Craven, P. and Wahba, G. (1979) Smoothing noisy data with spline functions. \emph{Numer. Math.} \bold{31}, 377-403.
@@ -44,10 +46,24 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are: \code{\link{np.est}}, \code{\link{np.cv}}, \code{\link{plrm.est}}, \code{\link{plrm.gcv}} and \code{\link{plrm.cv}}.
 }
 \examples{
-## Example: independent data
+# EXAMPLE 1: REAL DATA
+data <- matrix(10,120,2)
+data(barnacles1)
+barnacles1 <- as.matrix(barnacles1)
+data[,1] <- barnacles1[,1]
+data <- diff(data, 12)
+data[,2] <- 1:nrow(data)
+
+aux <- np.gcv(data)
+aux$h.opt
+plot(aux$h.seq, aux$GCV, xlab="h", ylab="GCV", type="l")
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: independent data
 
 set.seed(1234)
-
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n

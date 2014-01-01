@@ -71,7 +71,7 @@ for (k in 1:L)	{
 
    if (!is.null(Var.Cov.eps)) V.eps <- Var.Cov.eps[,,k]
 
-   	else {
+   else {
    		
        eps <- Y - X%*%beta.est[,1,k]
  		
@@ -81,10 +81,17 @@ for (k in 1:L)	{
   			  V.eps <- diag(var.eps,n,n)
 			  }
 	
-    		else V.eps <- var.cov.matrix(x=eps, n=n, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
+    		else {
+          V.eps <- matrix(NA, n, n)
+          Var.Cov.mat <- var.cov.matrix(x=eps, n=n, p.max=p.max, q.max=q.max, ic=ic, alpha=alpha, num.lb=num.lb)
 
-   		  if (!is.matrix(V.eps)) stop("The automatic criterion does not provide an ARMA model for the residuals. It is necessary to input the Var.Cov.eps matrix")
-		}
+          V.eps <- Var.Cov.mat[[1]]
+          pv.Box.test <- Var.Cov.mat[[2]]
+          pv.t.test <- Var.Cov.mat[[3]]
+          ar.ma <- Var.Cov.mat[[4]]
+    	}
+
+   }
 
    A.k <- n*X.X.1%*%t(X)%*%V.eps%*%X%*%X.X.1
     
@@ -97,7 +104,8 @@ Q.beta  <- n*t(B%*%BETA)%*%solve(B%*%A%*%t(B))%*%(B%*%BETA)
 p.v <- 1-pchisq(Q.beta, df=p*(L-1), ncp=0)
 
 
-data.frame(Q.beta=Q.beta, p.value=p.v)
-  
+if ((is.null(Var.Cov.eps)) && (time.series)) list(par.ancova=data.frame(Q.beta=Q.beta, p.value=p.v), pv.Box.test=pv.Box.test, pv.t.test=pv.t.test, ar.ma=ar.ma)
+else list(par.ancova=data.frame(Q.beta=Q.beta, p.value=p.v))
+
 }   
 

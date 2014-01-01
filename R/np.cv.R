@@ -1,10 +1,13 @@
 
-np.cv <- function(data=data, num.h=50, w=NULL, num.ln=1, ln.0=0, step.ln=2, 
+np.cv <- function(data=data, h.seq=NULL, num.h=50, w=NULL, num.ln=1, ln.0=0, step.ln=2, 
                   estimator="NW", kernel="quadratic")
 {
   
 if (!is.matrix(data))  stop("data must be a matrix")
 if (ncol(data) != 2)  stop("data must have 2 columns: y and t")
+
+if ( (!is.null(h.seq)) && (sum(is.na(h.seq))  != 0) ) stop ("h.seq must be numeric")
+if ( (!is.null(h.seq)) && (any(h.seq<=0)) ) stop ("h.seq must contain one ore more positive values")
 
 if (is.null(num.h))   stop ("num.h must not be NULL") 
 if (length(num.h) !=1)  stop ("num.h must be an only value")
@@ -20,7 +23,7 @@ if ( (!is.null(w)) && (w[1]>w[2]) ) stop("w[2] must be greater than w[1]")
 if (is.null(num.ln))   stop ("num.ln must not be NULL") 
 if (length(num.ln) !=1)  stop ("num.ln must be an only value")
 if (!is.numeric(num.ln))   stop ("num.ln must be numeric") 
-if (num.ln<=0)  stop ("num.ln must be a positive value") 
+if (num.ln<=0)  stop ("num.ln must be greater or equal than 0") 
 
 if (is.null(ln.0))   stop ("ln.0 must not be NULL") 
 if (length(ln.0) !=1)  stop ("ln.0 must be an only value")
@@ -43,26 +46,29 @@ n <- nrow(data)
 y <- data[, 1]
 t <- data[, 2]
   
+
 if (is.null(w)) w <- c(quantile(t,0.1), quantile(t,0.9))
   
+
+if (is.null(h.seq)) {
+  a <- as.matrix(abs(outer(t, t,"-")))
+  for (i in 1:n) {a[i,i] <- -1000}
+  a <- as.vector(a[a!=-1000])
+  
+  h.min <- quantile(a,0.05)
+  h.max <- (max(t)-min(t))*0.25
+  
+  h.seq <- seq(h.min, h.max, length.out=num.h) 
+}
+else num.h <- length(h.seq)
+
+
 CV <- matrix(0, num.h, num.ln)
 CV.opt <- 1:num.ln
 h.CV <- data.frame(matrix(0,2,num.ln),row.names=c("ln","h"))
   
-  
-
-a <- as.matrix(abs(outer(t, t,"-")))
-for (i in 1:n) {a[i,i] <- -1000}
-a <- as.vector(a[a!=-1000])
-  
-h.min <- quantile(a,0.05)
-h.max <- (max(t)-min(t))*0.25
-  
-h.seq <- seq(h.min, h.max, length.out=num.h)
-  
 ele.seq <- seq(from = ln.0, to =ln.0+(num.ln-1)*step.ln , by = step.ln)
-  
-  
+
   
 
 if (estimator=="NW") 

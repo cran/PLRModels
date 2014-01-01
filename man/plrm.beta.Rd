@@ -6,10 +6,10 @@ Semiparametric estimate for the parametric component of the regression function 
 }
 \description{
 This routine computes estimates for \eqn{\beta} from a sample \eqn{{(Y_i, X_{i1}, ..., X_{ip}, t_i): i=1,...,n}}, where:
-\deqn{\beta = (\beta_1,...,\beta_p)\;is\;an\;unknown\;vector\;parameter}
-and
+\deqn{\beta = (\beta_1,...,\beta_p)}
+is an unknown vector parameter and
 \deqn{Y_i= X_{i1}*\beta_1 +...+ X_{ip}*\beta_p + m(t_i) + \epsilon_i.}
-The nonparametric component, \eqn{m}, is a smooth but unknown function, and the random errors, \eqn{{\epsilon_i}}, are allowed to be time series. Ordinary least squares estimation, combined with kernel smoothing, is used.
+The nonparametric component, \eqn{m}, is a smooth but unknown function, and the random errors, \eqn{\epsilon_i}, are allowed to be time series. Ordinary least squares estimation, combined with kernel smoothing, is used.
 }
 \usage{
 plrm.beta(data = data, b.seq = NULL, estimator = "NW", kernel = "quadratic")
@@ -24,14 +24,14 @@ plrm.beta(data = data, b.seq = NULL, estimator = "NW", kernel = "quadratic")
 
 \code{data[, p+2]} contains the values of the "nonparametric" explanatory variable, \eqn{t}.
 }
-  \item{b.seq}{vector of bandwidths for estimating \eqn{\beta}. If \code{NULL} (the default), only one estimate of \eqn{\beta} is computed, the corresponding bandwidth being selected by means of the generalized cross-validation procedure.}
+  \item{b.seq}{vector of bandwidths for estimating \eqn{\beta}. If \code{NULL} (the default), only one estimate of \eqn{\beta} is computed, the corresponding bandwidth being selected by means of the cross-validation procedure.}
   \item{estimator}{allows us the choice between \dQuote{NW} (Nadaraya-Watson) or \dQuote{LLP} (Local Linear Polynomial). The default is \dQuote{NW}.}
   \item{kernel}{allows us the choice between \dQuote{gaussian}, \dQuote{quadratic} (Epanechnikov kernel), \dQuote{triweight} or \dQuote{uniform} kernel. The default is \dQuote{quadratic}.}
 }
 \details{
 The expression for the estimator of \eqn{\beta} can be seen in page 52 in Aneiros-Perez \emph{et al.} (2004).
 }
-\value{
+\value{A list containing:
 \item{BETA}{\code{p x length(b.seq)} matrix containing the estimate of \eqn{\beta} for each bandwidth in \code{h.seq}.}
 \item{G}{\code{n x p x length(b.seq)} array containing the nonparametric estimate of
 
@@ -51,9 +51,22 @@ Ana Lopez Cheda \email{ana.lopez.cheda@udc.es}}
 Other related functions are: \code{\link{plrm.est}}, \code{\link{plrm.gcv}}, \code{\link{plrm.cv}}.
 }
 \examples{
-set.seed(1234)
+# EXAMPLE 1: REAL DATA
+data(barnacles1)
+data <- as.matrix(barnacles1)
+data <- diff(data, 12)
+data <- cbind(data,1:nrow(data))
 
-## Example 1: independent data
+b.h <- plrm.gcv(data)$bh.opt
+ajuste <- plrm.beta(data=data, b=b.h[1])
+ajuste$BETA
+
+
+
+# EXAMPLE 2: SIMULATED DATA
+## Example 2a: independent data
+
+set.seed(1234)
 # We generate the data
 n <- 100
 t <- ((1:n)-0.5)/n
@@ -74,7 +87,9 @@ a <- plrm.beta(data_ind)
 a$BETA
 
 
-## Example 2: dependent data
+## Example 2b: dependent data
+
+set.seed(1234)
 # We generate the data
 x <- matrix(rnorm(200,0,1), nrow=n)
 sum <- x\%*\%beta
