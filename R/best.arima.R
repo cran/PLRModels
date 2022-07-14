@@ -70,7 +70,7 @@ for (Q in 0:Q.max)
 
 	ajuste <- try(arima(x=x, order=c(p,d,q), seasonal=list(order=c(P,D,Q), period=period), include.mean=include.mean, method=method), silent=TRUE)
 
-	if (class(ajuste)=="try-error") {
+	  if (inherits(ajuste, "try-error")) {
 					VALORES.CRITERIO[fila, ] <- c(p, q, P, Q, NaN)	
  					next
 						}

@@ -1,6 +1,6 @@
-d43248698c01cd1486b7e5c3573df961 *DESCRIPTION
-46fee5e1785179fb4c31e6f9e1a6b232 *NAMESPACE
-81cf521e0aca9b42bc044052b9ae433c *R/best.arima.R
+487095360251edb0f783cfb04e54d554 *DESCRIPTION
+78a0eb658ded4c9b946abcbf2a7679ed *NAMESPACE
+94b24f84ba87c88e721da615081be357 *R/best.arima.R
 d0350a85dd3a2d6cfad4ad4918f0b0c6 *R/kind.of.kernel.R
 b6e0d9b3d481f21232de2108244a1d86 *R/np.ancova.R
 8d71fdcab31a81396a2e1fb28ff19504 *R/np.cv.R
@@ -25,8 +25,8 @@ e63e8912e544faa707c9ab365da0f955 *data/barnacles1.txt.gz
 5935195caeee4c3412f12310bbef2194 *data/barnacles2.txt.gz
 2911ee28f537785c2adad794a07f6a36 *man/Epanechnikov.Rd
 e790f003d8548f3745c9ab15d052d466 *man/PLRModels.Rd
-beeebb693d6d2941668648d325859e09 *man/barnacles1.rd
-32df4839af7c9f6e7bbe9a0ad000cbcf *man/barnacles2.rd
+d0be5851c40798db169b8fe8dfcb3961 *man/barnacles1.rd
+8ce249781dfd3831877027d3d219d516 *man/barnacles2.rd
 d8c59ed1824016e1c13e12f2e6ce321d *man/best.arima.Rd
 967f86430a4f6de47cb27f3285f72eee *man/gaussian.Rd
 6962cf2c0a15ad6a98b1a241459784fd *man/np.ancova.Rd

@@ -18,6 +18,7 @@ A matrix containing 3 columns:
 \code{barnacles1[, 3]} contains the number of sales (in kg) of barnacles in Carino's fish market.
 }
 \source{
-\url{http://www.pescadegalicia.com/}
+\url{http://dm.udc.es/modes/sites/default/files/barnacles1.rar}
+\url{http://dm.udc.es/modes/sites/default/files/barnacles1.zip}
 }
 \keyword{datasets}
