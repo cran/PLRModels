@@ -1,5 +1,5 @@
 \name{Epanechnikov}
-
+\alias{Epanechnikov}
 \title{The Epanechnikov kernel
 }
 \description{

@@ -1,4 +1,4 @@
-487095360251edb0f783cfb04e54d554 *DESCRIPTION
+5033fecdc2d8069f8ace781e5943506a *DESCRIPTION
 78a0eb658ded4c9b946abcbf2a7679ed *NAMESPACE
 94b24f84ba87c88e721da615081be357 *R/best.arima.R
 d0350a85dd3a2d6cfad4ad4918f0b0c6 *R/kind.of.kernel.R
@@ -23,12 +23,12 @@ adfec2b39b8b8cb977f3b6b9df016c3f *R/var.cov.matrix.R
 2f9a9b6fe502570dc3884636fcf5574d *R/var.cov.sum.R
 e63e8912e544faa707c9ab365da0f955 *data/barnacles1.txt.gz
 5935195caeee4c3412f12310bbef2194 *data/barnacles2.txt.gz
-2911ee28f537785c2adad794a07f6a36 *man/Epanechnikov.Rd
+a2c1484a42a03234a297cc7285c06e9c *man/Epanechnikov.Rd
 e790f003d8548f3745c9ab15d052d466 *man/PLRModels.Rd
 d0be5851c40798db169b8fe8dfcb3961 *man/barnacles1.rd
 8ce249781dfd3831877027d3d219d516 *man/barnacles2.rd
-d8c59ed1824016e1c13e12f2e6ce321d *man/best.arima.Rd
-967f86430a4f6de47cb27f3285f72eee *man/gaussian.Rd
+313cd3d78d54652c2ed305df689c7564 *man/best.arima.Rd
+859c9d172deaaa97da004c3fab19492a *man/gaussian.Rd
 6962cf2c0a15ad6a98b1a241459784fd *man/np.ancova.Rd
 2fcb06e13e65831f38ee82b10a525f53 *man/np.cv.Rd
 b522c205ac613afd92934d057ba9c2ec *man/np.est.Rd
@@ -45,9 +45,9 @@ b59d52fcafff1e4cc72919d16ccda016 *man/plrm.cv.Rd
 d98210df5d57def17f7bd9da78a36247 *man/plrm.est.Rd
 a5b5fdd79e88f6bd63ae226ead414742 *man/plrm.gcv.Rd
 3c064f9c2053efebe6f842ac4f25c763 *man/plrm.gof.Rd
-ee04829774a0a01cc3fe6da9add036b6 *man/quadratic.Rd
-d80540c02abaf33631b5973b95fa0127 *man/symsolve.Rd
-10ffb93e202a4da711cb5c1a523a9ccc *man/triweight.Rd
-481cc62932cd3ec3d97f7e6c2bfc4e67 *man/uniform.Rd
-39aeadb71da9354d9d24ce838fc48e2e *man/var.cov.matrix.Rd
-c044570bba3e8cf12aacd4a5153a4577 *man/var.cov.sum.Rd
+42a56436dd8776e193c7211e5b54ea3c *man/quadratic.Rd
+4dd1c825f59af3e2338c8b2d3926ade3 *man/symsolve.Rd
+fc4827d3f7efe3c940342b36b1f3a152 *man/triweight.Rd
+6cbeefb503c672f11e587437d497bbd5 *man/uniform.Rd
+b92781835323960d70387e500e8bbfb1 *man/var.cov.matrix.Rd
+cbcfcd2796dff47254d553bbff0fd2cf *man/var.cov.sum.Rd

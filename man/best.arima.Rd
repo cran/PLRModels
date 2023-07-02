@@ -1,5 +1,5 @@
 \name{best.arima}
-
+\alias{best.arima}
 \title{Best Arima model according some information criterion
 }
 \description{Obtains the orders p, q, P and Q of the best ARIMA (p, d, q)x(P, D, Q)_s according one of the following information criteria: AIC, AICC, BIC.

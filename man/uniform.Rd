@@ -1,5 +1,5 @@
 \name{uniform}
-
+\alias{uniform}
 \title{The uniform kernel
 }
 \description{

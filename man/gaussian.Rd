@@ -1,5 +1,5 @@
 \name{gaussian}
-
+\alias{gaussian}
 \title{The gaussian kernel
 }
 \description{

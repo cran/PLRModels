@@ -1,5 +1,5 @@
 \name{triweight}
-
+\alias{triweight}
 \title{The triweight kernel
 }
 \description{

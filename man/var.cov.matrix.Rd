@@ -1,5 +1,5 @@
 \name{var.cov.matrix}
-
+\alias{var.cov.matrix}
 \title{Estimated variance-covariance matrix from time series
 }
 \description{

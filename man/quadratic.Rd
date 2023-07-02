@@ -1,5 +1,5 @@
 \name{quadratic}
-
+\alias{quadratic}
 \title{The quadratic kernel
 }
 \description{

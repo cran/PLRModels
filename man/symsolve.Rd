@@ -1,5 +1,5 @@
 \name{symsolve}
-
+\alias{symsolve}
 \title{Solution of a system of linear equations
 }
 \description{
